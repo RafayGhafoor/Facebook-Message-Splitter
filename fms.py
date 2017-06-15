@@ -1,3 +1,4 @@
+import shutil
 import re
 import bs4
 import os
@@ -8,25 +9,17 @@ os.chdir("/home/rafay/Downloads/facebook-RafayGhafoor/html/")
 reload(sys)
 sys.setdefaultencoding('utf8')
 para_text = []
-chat_participants = []
 
-
-def get_participants():
-    '''Gets Users who are participating in the chat.'''
-    for participants in soup.findAll("div", {"class": "thread"}):
-        if participants not in chat_participants:
-            chat_participants.append(participants.children.next().encode("ascii").strip())
-
-
+os.mkdir("Messages")
+os.mkdir("Same")
 def format_messages():
     '''Formats messages nicely.'''
     count = 0
     for ps in soup.findAll("p"):
         para_text.append(ps.text.strip())
-
     for divs in soup.findAll("div", {"class": "message_header"}):
-        sender = divs.find("span", {"class": "user"}).text.strip()
-        meta_data = divs.find("span", {"class": "meta"}).text.strip()
+        sender = divs.find("span", {"class": "user"}).text.strip().encode("ascii", "ignore")
+        meta_data = divs.find("span", {"class": "meta"}).text.strip().encode("ascii", "ignore")
         print("Sender: \t%s\nDate:    \t%s\nMessage: \t%s\n\n%s\n"\
                         % (sender, meta_data, para_text[count].strip(), "-" * (len(meta_data) + 20)))
         if count == len(para_text):
@@ -54,6 +47,35 @@ def get_ids(filename):
         return lst
 
 
+def detect_conv_end(filename, genfileName="Messages.txt"):
+    '''Detect end of the conversation between two participants'''
+    participants = []
+    end = ""
+    num = 1
+    with open(filename, "r") as f:
+        for line in f:
+            with open(genfileName, "a") as z:
+                    s = re.search(r'Sender.*', line)
+                    if s:
+                        if s.group().replace("Sender:", "").strip() not in participants and len(participants) == 2:
+                            os.rename("Messages.txt", (participants[0] + ' - ' + participants[1] + ".txt"))
+                            try:
+                                shutil.move((participants[0] + ' - ' + participants[1] + ".txt"), "Messages")
+                            except shutil.Error:
+                                name = participants[0] + ' - ' + participants[1]
+                                os.rename(name  + ".txt", name + str(num) + ".txt")
+                                shutil.move(name + str(num) + ".txt", "Messages")
+                                num += 1
+                            participants = []
+                            end += "Convo"
+                        if s.group().replace("Sender:", "").strip() not in participants:
+                            participants.append(s.group().replace("Sender:", "").strip())
+                    if end != "Convo":
+                        z.write(line)
+                    end = ""
+
+
+
 def get_profile_names(user_ids):
     '''Get profile name from userid. For Example:-
     >>> 100004561272818 [INPUT]
@@ -71,7 +93,7 @@ def get_profile_names(user_ids):
     br.open('https://www.facebook.com/')
     br.select_form(nr=0)
     br['email'] = 'email'
-    br['pass'] = 'pwd'
+    br['pass'] = 'passwd'
     res = br.submit()
     print "Successfully Logged in!\n"
     for i, ids in enumerate(user_ids):
@@ -83,7 +105,7 @@ def get_profile_names(user_ids):
             for k,v in id_profile.iteritems():
                 z.write("%s: %s\n" % (k, v))
 
-                
+
 def uid_pnames(filename, uid_pnames):	    # UserID to Profile Names
     '''Replace UserIDs with Profile Names'''
     with open(filename, 'r') as f:
@@ -95,12 +117,13 @@ def uid_pnames(filename, uid_pnames):	    # UserID to Profile Names
                 z.write(line)
 
 def main():
-     openfile()
-     format_messages()
-     ids_lst = get_ids("filename")
-     name = get_profile_names(ids_lst)
-     uid_pnames("split_messages.txt", name)
-     for k,v in name.iteritems():
-        print "ID: %s --> %s" % (k, v)
+    detect_conv_end("newsplit_messages.txt")
+    # openfile()
+    # format_messages()
+    # ids_lst = get_ids("filename")
+    # name = get_profile_names(ids_lst)
+    # uid_pnames("split_messages.txt", name)
+#    for k,v in name.iteritems():
+#        print "ID: %s --> %s" % (k, v)
 
 main()
