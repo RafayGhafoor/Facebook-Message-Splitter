@@ -9,9 +9,12 @@ os.chdir("/home/rafay/Downloads/facebook-RafayGhafoor/html/")
 reload(sys)
 sys.setdefaultencoding('utf8')
 para_text = []
+try:
+    os.mkdir("Messages")
+except OSError:
+    pass
 
-os.mkdir("Messages")
-os.mkdir("Same")
+
 def format_messages():
     '''Formats messages nicely.'''
     count = 0
@@ -45,41 +48,72 @@ def get_ids(filename):
                 if s.group() not in lst and s.group()[0] == '1' and s.group()[1:5] == '0000':
                     lst.append(s.group())
         return lst
-
-
+    
+    
 def detect_conv_end(filename, genfileName="Messages.txt"):
     '''Detect end of the conversation between two participants'''
     participants = []
-    end = ""
-    num = 1
+    num = 0
     with open(filename, "r") as f:
         for line in f:
             with open(genfileName, "a") as z:
-                    s = re.search(r'Sender.*', line)
-                    if s:
-                        if s.group().replace("Sender:", "").strip() not in participants and len(participants) == 2:
-                            os.rename("Messages.txt", (participants[0] + ' - ' + participants[1] + ".txt"))
-                            try:
-                                shutil.move((participants[0] + ' - ' + participants[1] + ".txt"), "Messages")
-                            except shutil.Error:
-                                name = participants[0] + ' - ' + participants[1]
-                                os.rename(name  + ".txt", name + str(num) + ".txt")
-                                shutil.move(name + str(num) + ".txt", "Messages")
-                                num += 1
-                            participants = []
-                            end += "Convo"
-                        if s.group().replace("Sender:", "").strip() not in participants:
-                            participants.append(s.group().replace("Sender:", "").strip())
-                    if end != "Convo":
-                        z.write(line)
-                    end = ""
+                s = re.search(r'Sender.*', line)
+                if s:
+                    sender = s.group().replace("Sender:", "").strip()
+                    if sender not in participants and len(participants) == 2:
+                        newfilename = ' - '.join(participants)
+                        if not os.path.exists(newfilename):
+                            os.rename(genfileName, newfilename)
+                        elif os.path.exists(newfilename):
+                            os.rename(genfileName, newfilename + str(num))
+                            num += 1
+                        participants = []
+                    if sender not in participants:
+                        participants.append(sender)
+                 z.write(line)
 
+                
+def del_with_numbers():
+    '''Delete filenames ending with numbers.'''
+    pattern = re.compile(r'\d{10,}')
+    for i in os.listdir('.'):
+        if pattern.search(i):
+            os.remove(i)
+
+
+def combine_conv():
+    '''Combine Splitted Conversations to Single Users'''
+    digits = re.compile(r'\d+$')
+    matching_files = {}
+    for i in os.listdir('.'):
+        if not digits.search(i):
+            matching_files[i] = []
+    for i in os.listdir('.'):
+        if digits.search(i):
+            matching_files[i.replace(digits.search(i).group(), "")].append(i)
+    for k, v in matching_files.iteritems():
+        if v != []:
+            with open(k, 'a') as f:
+                for i in v:
+                    with open(i, "r") as x:
+                        for line in x:
+                            f.write(line)
+                    os.remove(i)
+
+                    
+def rm_numbers(filename):
+    '''Remove Numbers from the filename'''
+    digits = re.search(r'\d+', filename)
+    if digits:
+        print digits.group()
+        filename = filename.replace(digits.group(), "")
+    return filename
 
 
 def get_profile_names(user_ids):
     '''Get profile name from userid. For Example:-
-    >>> 100004561272818 [INPUT]
-    >>> Alan Walker [OUTPUT]
+    >>> 100004561372818 [INPUT]
+    >>> Rafay Ghafoor [OUTPUT]
     '''
     id_profile = {}
     br = mechanize.Browser()
@@ -92,8 +126,8 @@ def get_profile_names(user_ids):
     br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:53.0) Gecko/20100101 Firefox/53.0')]
     br.open('https://www.facebook.com/')
     br.select_form(nr=0)
-    br['email'] = 'email'
-    br['pass'] = 'passwd'
+    br['email'] = ''
+    br['pass'] = ''
     res = br.submit()
     print "Successfully Logged in!\n"
     for i, ids in enumerate(user_ids):
@@ -116,14 +150,27 @@ def uid_pnames(filename, uid_pnames):	    # UserID to Profile Names
                         line = line.replace(uid + "@facebook.com", pnames)
                 z.write(line)
 
+
+def clean():
+    '''Clean Messages'''
+    for i in os.listdir('.'):
+        if i != "newsplit_messages.txt":
+            try:
+                os.remove(i)
+            except:
+                pass
+
+
 def main():
-    detect_conv_end("newsplit_messages.txt")
+    # del_with_numbers()
+    # combine_conv()
+    # clean()
+    # detect_conv_end("newsplit_messages.txt")
     # openfile()
     # format_messages()
     # ids_lst = get_ids("filename")
     # name = get_profile_names(ids_lst)
-    # uid_pnames("split_messages.txt", name)
-#    for k,v in name.iteritems():
-#        print "ID: %s --> %s" % (k, v)
+    # uid_pnames("newsplit_messages.txt", name)
+    pass
 
 main()
