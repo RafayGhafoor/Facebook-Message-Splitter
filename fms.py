@@ -16,7 +16,7 @@ except OSError:
 
 
 def format_messages():
-    '''Formats messages nicely.'''
+    '''Formats messages nicely and write them to a file'''
     count = 0
     for ps in soup.findAll("p"):
         para_text.append(ps.text.strip())
@@ -48,33 +48,36 @@ def get_ids(filename):
                 if s.group() not in lst and s.group()[0] == '1' and s.group()[1:5] == '0000':
                     lst.append(s.group())
         return lst
-    
-    
+
+
 def detect_conv_end(filename, genfileName="Messages.txt"):
     '''Detect end of the conversation between two participants'''
     participants = []
     num = 0
+    next_lines = []
     with open(filename, "r") as f:
-        for line in f:
+         for line in f:
+            check = 0
+            s = re.search(r'Sender.*', line)
+            if s:
+                sender = s.group().replace("Sender:", "").strip()
+                if sender not in participants and len(participants) == 2:
+                    newfilename = ' - '.join(participants)
+                    if not os.path.exists(newfilename):
+                        os.rename(genfileName, newfilename)
+                    elif os.path.exists(newfilename):
+                        os.rename(genfileName, newfilename + str(num))
+                        num += 1
+                    check += 1
+                    participants = []
+                if sender not in participants:
+                    participants.append(sender)
             with open(genfileName, "a") as z:
-                s = re.search(r'Sender.*', line)
-                if s:
-                    sender = s.group().replace("Sender:", "").strip()
-                    if sender not in participants and len(participants) == 2:
-                        newfilename = ' - '.join(participants)
-                        if not os.path.exists(newfilename):
-                            os.rename(genfileName, newfilename)
-                        elif os.path.exists(newfilename):
-                            os.rename(genfileName, newfilename + str(num))
-                            num += 1
-                        participants = []
-                    if sender not in participants:
-                        participants.append(sender)
-                 z.write(line)
+                z.write(line)
 
-                
+
 def del_with_numbers():
-    '''Delete filenames ending with numbers.'''
+    '''Delete files with numbers.''''
     pattern = re.compile(r'\d{10,}')
     for i in os.listdir('.'):
         if pattern.search(i):
@@ -82,7 +85,7 @@ def del_with_numbers():
 
 
 def combine_conv():
-    '''Combine Splitted Conversations to Single Users'''
+    '''Combine Conversations in Single User format.'''
     digits = re.compile(r'\d+$')
     matching_files = {}
     for i in os.listdir('.'):
@@ -100,9 +103,9 @@ def combine_conv():
                             f.write(line)
                     os.remove(i)
 
-                    
+
 def rm_numbers(filename):
-    '''Remove Numbers from the filename'''
+    '''Remove digits from the filename'''
     digits = re.search(r'\d+', filename)
     if digits:
         print digits.group()
@@ -112,8 +115,8 @@ def rm_numbers(filename):
 
 def get_profile_names(user_ids):
     '''Get profile name from userid. For Example:-
-    >>> 100004561372818 [INPUT]
-    >>> Rafay Ghafoor [OUTPUT]
+    >>> 100004561272818 [INPUT]
+    >>> Alan Walker [OUTPUT]
     '''
     id_profile = {}
     br = mechanize.Browser()
@@ -152,7 +155,7 @@ def uid_pnames(filename, uid_pnames):	    # UserID to Profile Names
 
 
 def clean():
-    '''Clean Messages'''
+    '''Clean Messages except for the original file.'''
     for i in os.listdir('.'):
         if i != "newsplit_messages.txt":
             try:
@@ -161,7 +164,15 @@ def clean():
                 pass
 
 
+def move_to_messages():
+    '''Move msgs to Messages folder'''
+    for i in os.listdir("."):
+        if not i.endswith(".txt"):
+            shutil.move(i, "Messages")
+
+
 def main():
+    # move_to_messages()
     # del_with_numbers()
     # combine_conv()
     # clean()
@@ -171,6 +182,8 @@ def main():
     # ids_lst = get_ids("filename")
     # name = get_profile_names(ids_lst)
     # uid_pnames("newsplit_messages.txt", name)
+#   for k,v in name.iteritems():
+#        print "ID: %s --> %s" % (k, v)
     pass
 
 main()
