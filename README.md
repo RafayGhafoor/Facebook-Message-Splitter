@@ -14,9 +14,13 @@ It reads the html file and obtains the sender name, message sent/received date a
 
 # Example:
 
+- Facebook backup data Sample:
+
 ![alt text](http://i.imgur.com/PNcPIjg.png)
 
 will be converted to:
+
+- Script output sample (text file of two users):
 
 ![alt text](http://i.imgur.com/h2VNIOi.png)
 
