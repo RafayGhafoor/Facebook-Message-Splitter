@@ -14,20 +14,11 @@ It reads the html file and obtains the sender name, message sent/received date a
 
 # Example:
 
-[ ] http://i.imgur.com/PNcPIjg.png
+[http://i.imgur.com/PNcPIjg.png] 
 
 will be converted to:
 
-Sender: 	ABC
-Date:    	Sunday, 18 December 2020 at 10:25 XYZ
-Message: 	XYZ
-
-------------------------------------------------------------
-Sender: 	XYZ
-Date:    	Sunday, 18 December 2020 at 10:25 XYZ
-Message: 	ABC
-
-------------------------------------------------------------
+[http://i.imgur.com/h2VNIOi.png] 
 
 # TODO:
 
