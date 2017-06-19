@@ -24,6 +24,8 @@ will be converted to:
 
 ![alt text](http://i.imgur.com/h2VNIOi.png)
 
+![alt text](http://i.imgur.com/wzqACun.png)
+
 # TODO:
 
 - [ ] Parse date.
