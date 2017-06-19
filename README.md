@@ -14,15 +14,15 @@ It reads the html file and obtains the sender name, message sent/received date a
 
 # Example:
 
-[http://i.imgur.com/PNcPIjg.png] 
+![alt text](http://i.imgur.com/PNcPIjg.png)
 
 will be converted to:
 
-[http://i.imgur.com/h2VNIOi.png] 
+![alt text](http://i.imgur.com/h2VNIOi.png)
 
 # TODO:
 
 - [ ] Parse date.
 - [ ] Creating a nice HTML page for messages.
-- [ ] Ability to search links inside messages.
+- [X] Ability to search links inside messages.
 - [ ] Average response time from specific users
