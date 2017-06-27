@@ -5,7 +5,7 @@ import os
 import mechanize
 import sys
 
-os.chdir("/home/rafay/Downloads/facebook-RafayGhafoor/html/")
+# os.chdir("/home/rafay/Downloads/facebook-RafayGhafoor/html/")
 reload(sys)
 sys.setdefaultencoding('utf8')
 para_text = []
@@ -16,7 +16,9 @@ except OSError:
 
 
 def format_messages():
-    '''Formats messages nicely and write them to a file'''
+    '''
+    Formats messages nicely and write them to a file.
+    '''
     count = 0
     for ps in soup.findAll("p"):
         para_text.append(ps.text.strip())
@@ -32,14 +34,18 @@ def format_messages():
 
 
 def openfile(filename="test.htm"):
-    '''Opens Messages file for reading data.'''
+    '''
+    Opens Messages file for reading data.
+    '''
     with open(filename, 'r') as f:
         global soup
         soup = bs4.BeautifulSoup(f, "html.parser")
 
 
 def get_ids(filename):
-    '''Gets userid from the provided file.'''
+    '''
+    Gets userid from the provided file.
+    '''
     with open("split_messages.txt", "r") as f:
     	lst = []
     	for line in f:
@@ -51,7 +57,9 @@ def get_ids(filename):
 
 
 def detect_conv_end(filename, genfileName="Messages.txt"):
-    '''Detect end of the conversation between two participants'''
+    '''
+    Detect end of the conversation between two participants.
+    '''
     participants = []
     num = 0
     next_lines = []
@@ -77,7 +85,9 @@ def detect_conv_end(filename, genfileName="Messages.txt"):
 
 
 def del_with_numbers():
-    '''Delete files with numbers.''''
+    '''
+    Delete files with numbers.
+    '''
     pattern = re.compile(r'\d{10,}')
     for i in os.listdir('.'):
         if pattern.search(i):
@@ -85,7 +95,9 @@ def del_with_numbers():
 
 
 def combine_conv():
-    '''Combine Conversations in Single User format.'''
+    '''
+    Combine Conversations in Single User format.
+    '''
     digits = re.compile(r'\d+$')
     matching_files = {}
     for i in os.listdir('.'):
@@ -105,7 +117,9 @@ def combine_conv():
 
 
 def rm_numbers(filename):
-    '''Remove digits from the filename'''
+    '''
+    Remove digits from the filename.
+    '''
     digits = re.search(r'\d+', filename)
     if digits:
         print digits.group()
@@ -114,7 +128,8 @@ def rm_numbers(filename):
 
 
 def get_profile_names(user_ids):
-    '''Get profile name from userid. For Example:-
+    '''
+    Get profile name from userid. For Example:-
     >>> 100004561272818 [INPUT]
     >>> Alan Walker [OUTPUT]
     '''
@@ -144,7 +159,9 @@ def get_profile_names(user_ids):
 
 
 def uid_pnames(filename, uid_pnames):	    # UserID to Profile Names
-    '''Replace UserIDs with Profile Names'''
+    '''
+    Replace UserIDs with profile names.
+    '''
     with open(filename, 'r') as f:
         with open(("new" + filename), 'a') as z:
             for i, line in enumerate(f, 1):
@@ -155,7 +172,9 @@ def uid_pnames(filename, uid_pnames):	    # UserID to Profile Names
 
 
 def clean():
-    '''Clean Messages except for the original file.'''
+    '''
+    Clean Messages except for the original file.
+    '''
     for i in os.listdir('.'):
         if i != "newsplit_messages.txt":
             try:
@@ -165,7 +184,9 @@ def clean():
 
 
 def move_to_messages():
-    '''Move msgs to Messages folder'''
+    '''
+    Move msgs to Messages folder.
+    '''
     for i in os.listdir("."):
         if not i.endswith(".txt"):
             shutil.move(i, "Messages")
