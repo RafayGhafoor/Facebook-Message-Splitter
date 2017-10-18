@@ -1,7 +1,7 @@
-import shutil
-import re
 import bs4
 import os
+# import shutil
+# import re
 # import mechanize
 # import sys
 # reload(sys)
@@ -27,21 +27,18 @@ def get_threads():
     Get message threads i.e., conversation between two participants and
     returns them as a list.
     '''
-    current_participants = []
+    msg_lst = []
 
-    for x in soup.findAll('div', {'class': 'thread'}):
+    for msg in soup.findAll("p"):
+        msg_lst.append(msg.text.strip())
 
-        if x.contents[0].strip() not in current_participants:
-            current_participants = []
-            current_participants.append(x.contents[0].strip())
-            print("Chat switched to {}".format(current_participants[0]))
-
-        sender = x.find('span', {'class': 'user'}).text.strip()
-        meta = x.find('span', {'class': 'meta'}).text.strip()
-        message_lst = x.findAll('p')
-
-        for msg in message_lst:
-            print("Sender: {}\nTime Stamp: {}\nMessage: {}\n".format(sender, meta, msg.text))
+    for z in soup.findAll('div', class_='thread'):
+        filename = z.contents[0].strip()
+        for x in z.findAll("div", class_="message_header"):
+            with open(filename + ".txt", "a") as f:
+                sender = x.find('span', {'class': 'user'}).text.strip()
+                meta = x.find('span', {'class': 'meta'}).text.strip()
+                f.write("Sender: {}\nTime Stamp: {}\nMessage: {}\n\n".format(sender, meta, msg_lst[count]))
 
 
 def extract_messages(participants):
